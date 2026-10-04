@@ -49,14 +49,18 @@ def build_trajectory_figure(V0, h_max, trajectory, reference, r_range=(0.1, 2.5)
 
 
 def build_iteration_comparison_figure(sqp_iter, penalty_iter, barrier_iter, target_err,
-                                      title=None):
+                                      title=None, max_outer=40):
     methods = ["SQP", "Straf-Verfahren", "Barriere-Verfahren"]
-    values = [sqp_iter, penalty_iter, barrier_iter]
+    raw = [sqp_iter, penalty_iter, barrier_iter]
+    # Erreicht ein Verfahren die Toleranz nicht (None), zeigt der Balken die ausgeschöpfte
+    # Stufenzahl und ist als "nicht erreicht" beschriftet — keine erfundene Iterationszahl.
+    values = [max_outer if v is None else v for v in raw]
+    labels = [f"nicht erreicht (nach {max_outer})" if v is None else str(v) for v in raw]
     if title is None:
         title = f"Äußere Iterationen bis Fehler < {target_err:.0e}"
     fig = go.Figure()
     fig.add_trace(go.Bar(x=methods, y=values, marker_color=[COLOR_SQP, "#d62728", "#ff7f0e"],
-                         text=values, textposition="outside"))
+                         text=labels, textposition="outside"))
     fig.update_layout(
         title=title, xaxis=dict(title="Verfahren", fixedrange=True),
         yaxis=dict(title="Äußere Iterationen/Stufen", fixedrange=True),

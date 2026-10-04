@@ -77,12 +77,12 @@ st.markdown(
     "Stück 5 löste die restringierte Zylinder-Aufgabe über eine **Folge unrestringierter "
     "Probleme**. SQP löst sie **direkt**: an jedem Punkt eine kleine quadratische Näherung (QP) "
     "des Originalproblems, deren Lösung der nächste Schritt ist. Mit der exakten Hesse-Matrix der "
-    "Lagrange-Funktion ist das mathematisch **identisch** zu Newton's Verfahren auf dem "
+    "Lagrange-Funktion ist das mathematisch **identisch** zu Newtons Verfahren auf dem "
     "KKT-System (Stück 4) — keine Näherung, eine exakte Äquivalenz."
 )
 st.caption(
-    "Stück 6 der 'Nichtlineare Optimierung'-Reihe. Geplante Folgestücke (noch nicht gebaut): "
-    "Innere-Punkte-Verfahren, Stochastische Gradientenverfahren."
+    "Stück 6 der 'Nichtlineare Optimierung'-Reihe. Folgestücke: "
+    "Innere-Punkte-Verfahren (Stück 7), Stochastische Gradientenverfahren (Stück 8)."
 )
 
 with st.expander("So funktioniert SQP", expanded=True):
@@ -148,7 +148,7 @@ with col_right:
     st.metric("SQP-Iterationen", out["n_iter"])
     st.caption(
         "Zum Vergleich: Straf-/Barriere-Verfahren (Stück 5) brauchen für dieselbe Genauigkeit "
-        "typischerweise 12-16 äußere Stufen (siehe 🎯 unten)."
+        "typischerweise 12-16 äußere Stufen — oder erreichen sie gar nicht (siehe 🎯 unten)."
     )
 
 st.markdown("---")
@@ -158,16 +158,11 @@ col_a, col_b = st.columns([2, 3])
 with col_a:
     st.plotly_chart(
         viz.build_iteration_comparison_figure(comp["sqp_iter"], comp["penalty_iter"],
-                                              comp["barrier_iter"], comp["target_err"]),
+                                              comp["barrier_iter"], comp["target_err"],
+                                              max_outer=comp["max_outer"]),
         key=f"comp_{V0}_{h_max}", use_container_width=True)
 with col_b:
-    st.markdown(
-        f"SQP braucht **{comp['sqp_iter']}** Iterationen, um auf Maschinengenauigkeit zu "
-        f"konvergieren. Straf- und Barriere-Verfahren (Stück 5) brauchen **{comp['penalty_iter']}** "
-        f"bzw. **{comp['barrier_iter']}** äußere Stufen, nur um den viel gröberen Fehler "
-        f"{comp['target_err']:.0e} zu unterschreiten — SQP greift das restringierte Problem "
-        "direkt an, statt über eine Parameterfolge zu iterieren."
-    )
+    st.markdown(ev.describe_iteration_comparison(comp))
 
 st.subheader("🚧 Wo die Annahmen enden")
 st.markdown(
@@ -175,7 +170,7 @@ st.markdown(
     "|---|---|---|\n"
     "| Voller Newton-Schritt konvergiert ohne Sicherung | Bei größeren/steiferen Problemen kann "
     "der volle Schritt divergieren — ein Line-Search oder eine Merit-Funktion wird nötig | "
-    "Innere-Punkte-Verfahren (kommendes Stück) haben eine eingebaute Sicherung |\n"
+    "Innere-Punkte-Verfahren (Stück 7) haben eine eingebaute Sicherung |\n"
     "| Startwert für λ ist informiert (aus Dimensionsanalyse) | Ein neutraler Start (λ₀=0) "
     "verursacht einen vorübergehenden Fehlgriff bei der aktiven Menge und viel mehr Iterationen "
     "(siehe 📐) | Informierte Startwerte (hier bereits verwendet) |\n"
@@ -251,7 +246,7 @@ $H_L=\nabla^2f+\lambda\nabla^2g_1$.
 
 st.markdown("---")
 st.caption(
-    "Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) "
-    "– Operations Research und Machine Learning. Interesse an einer maßgeschneiderten Lösung "
-    "für Ihr Unternehmen? [Kontakt aufnehmen](https://sebastianhanisch.net/kontakt.html)"
+    "Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – "
+    "Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). "
+    "Mehr zur Reihe: [Nichtlineare Optimierung: acht Stücke, zwei Äste](https://sebastianhanisch.net/konzepte-nichtlineare-optimierung.html)."
 )

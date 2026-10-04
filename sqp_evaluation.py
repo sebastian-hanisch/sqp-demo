@@ -211,6 +211,9 @@ def iteration_count_comparison(V0: float = 10.0, h_max: float = 5.0, target_err:
             penalty_iter = k + 1
             break
         rho *= 3.0
+    # Nicht erreicht: das Strafverfahren kann an dem trivialen Stationaerpunkt x = (0, 0) haengen
+    # bleiben (dort verschwinden Gradient von A und von g, fuer jedes rho).
+    penalty_stuck_at_origin = penalty_iter is None and bool(np.linalg.norm(x) < 1e-3)
 
     r_boundary = float(np.sqrt(V0 / (np.pi * h_max)))
     r = 1.5 * r_boundary
@@ -226,7 +229,42 @@ def iteration_count_comparison(V0: float = 10.0, h_max: float = 5.0, target_err:
         mu /= 3.0
 
     return {"sqp_iter": sqp_iter, "penalty_iter": penalty_iter, "barrier_iter": barrier_iter,
-            "target_err": target_err}
+            "target_err": target_err, "max_outer": max_outer,
+            "penalty_stuck_at_origin": penalty_stuck_at_origin}
+
+
+def describe_iteration_comparison(comp: dict) -> str:
+    """Ehrlicher Satz zur Iterationszahl-Messung. Erreicht ein Verfahren die Toleranz in den
+    erlaubten Stufen nicht (iter = None), wird das gesagt, statt eine Zahl vorzutäuschen."""
+    max_outer = comp.get("max_outer", 40)
+    tol = f"{comp['target_err']:.0e}"
+    head = (f"SQP braucht **{comp['sqp_iter']}** Iterationen, um auf Maschinengenauigkeit zu "
+            "konvergieren. ")
+    pen, bar = comp["penalty_iter"], comp["barrier_iter"]
+
+    def _failure(name, stuck_at_origin=False):
+        txt = (f"das {name} erreicht den Fehler {tol} innerhalb von {max_outer} äußeren Stufen "
+               "gar nicht")
+        if stuck_at_origin:
+            txt += (" (es bleibt am trivialen Stationärpunkt r = h = 0 hängen, wo das Volumen "
+                    "null ist)")
+        return txt
+
+    if pen is not None and bar is not None:
+        body = (f"Straf- und Barriere-Verfahren (Stück 5) brauchen **{pen}** bzw. **{bar}** "
+                f"äußere Stufen, nur um den viel gröberen Fehler {tol} zu unterschreiten")
+    elif pen is None and bar is None:
+        body = (f"Straf- und Barriere-Verfahren (Stück 5) erreichen den viel gröberen Fehler {tol} "
+                f"innerhalb von {max_outer} äußeren Stufen beide nicht")
+    elif pen is None:
+        body = (f"Das Barriere-Verfahren (Stück 5) braucht **{bar}** äußere Stufen, nur um den "
+                f"viel gröberen Fehler {tol} zu unterschreiten; "
+                + _failure("Straf-Verfahren", comp.get("penalty_stuck_at_origin", False)))
+    else:
+        body = (f"Das Straf-Verfahren (Stück 5) braucht **{pen}** äußere Stufen, nur um den "
+                f"viel gröberen Fehler {tol} zu unterschreiten; " + _failure("Barriere-Verfahren"))
+    return (head + body + " — SQP greift das restringierte Problem direkt an, statt über eine "
+            "Parameterfolge zu iterieren.")
 
 
 def naive_start_pitfall_check() -> dict:

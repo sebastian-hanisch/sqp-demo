@@ -18,15 +18,15 @@ Gradientenabstieg (WURZEL)                       [gebaut]
            └─ Lagrange-Multiplikatoren/KKT        [gebaut]
                 ├─ Straf-/Barriere-Verfahren      [gebaut]
                 └─ SQP                            [DIESES STÜCK]
-                     └─ Innere-Punkte-Verfahren   [nicht gebaut]
- └─ Stochastische Gradientenverfahren             [nicht gebaut, letztes Stück]
+                     └─ Innere-Punkte-Verfahren   [gebaut: interior-point-nlp-demo]
+ └─ Stochastische Gradientenverfahren             [gebaut: stochastische-gradientenverfahren-demo, letztes Stück]
 ```
 
 **Vehikel B (wiederverwendet, eigene Kopie ohne Import):** derselbe zylindrische
 Transportbehälter — Materialkosten minimieren bei festem Volumen und einem Höhenlimit.
 
 **Zentrale, exakte theoretische Erkenntnis:** SQP mit der EXAKTEN Hesse-Matrix der
-Lagrange-Funktion ist mathematisch **identisch** mit Newton's Verfahren auf dem KKT-System aus
+Lagrange-Funktion ist mathematisch **identisch** mit Newtons Verfahren auf dem KKT-System aus
 Stück 4 (Nocedal & Wright, Kap. 18) — keine Näherung, eine exakte Äquivalenz, hier numerisch
 verifiziert (Abweichung $4{,}4\cdot10^{-16}$).
 
@@ -54,7 +54,7 @@ Folge kleiner, exakt lösbarer quadratischer Modelle des Originalproblems selbst
 | Bei fixierter aktiver Menge liefert der SQP-Schritt exakt denselben Schritt wie Newton auf dem KKT-System (Stück 4) | ✅ Abweichung $4{,}4\cdot10^{-16}$ |
 | SQP konvergiert für beide Presets zur selben Referenzlösung wie Stück 4/5 | ✅ 5 Iterationen, Fehler $\le1{,}8\cdot10^{-15}$ |
 | Am rein linear restringierten Hilfsproblem konvergiert SQP in genau 1 Iteration, unabhängig vom Startpunkt | ✅ 4/4 getestete Startpunkte |
-| SQP braucht deutlich weniger äußere Iterationen als Straf-/Barriere-Verfahren | ✅ 5 vs. 12 (bei einem 1000-fach gröberen Zielfehler für Straf/Barriere) |
+| SQP braucht deutlich weniger äußere Iterationen als Straf-/Barriere-Verfahren | ✅ 5 vs. 12 (Straf/Barriere nur bis zum Fehler $10^{-6}$, SQP bis $\approx10^{-15}$) |
 | Gradienten-Check gegen finite Differenzen unter $10^{-6}$ | ✅ $2{,}6\cdot10^{-10}$ / $5{,}4\cdot10^{-11}$ |
 | ⚠️ **Nicht vorab vermutet, aber gefunden:** ein neutraler Startwert $\lambda_0=0$ kann zu einem vorübergehenden Fehlgriff bei der aktiven Menge führen | ⚠️ bestätigt — 13 statt 5 Iterationen, ein Fall-Wechsel während der Folge |
 | ⚠️ **Ebenfalls ungeplant gefunden:** manche Startpunkte konvergieren zu einem physikalisch unsinnigen, aber mathematisch gültigen KKT-Punkt (negativer Radius) | ⚠️ bestätigt — dieselbe Klasse Fund wie Stück 4s SciPy-Fallstrick |
@@ -84,6 +84,12 @@ Lösung, alle in $\le5$ Iterationen.
 Iterationen (auf Maschinengenauigkeit, weit unter dem Zielfehler) gegen **12** äußere Stufen für
 sowohl das Straf- als auch das Barriere-Verfahren (Stück 5), um überhaupt erst den viel gröberen
 Zielfehler zu erreichen.
+
+**Grenze des Vergleichs:** Für kleine Volumina ($V_0 \lesssim 5$, bei $h_{\max}=5$ gemessen) erreicht das
+Strafverfahren (Start $r=h=V_0^{1/3}$) den Zielfehler in den erlaubten 40 äußeren Stufen **gar nicht**: es
+bleibt am trivialen Stationärpunkt $r=h=0$ hängen (dort verschwinden Gradient der Oberfläche und der
+Volumen-Nebenbedingung, für jedes $\rho$). Die App sagt das dann ausdrücklich und nennt keine Stufenzahl;
+das Barriere-Verfahren braucht im gemessenen Bereich 11–16 Stufen.
 
 **Ehrlicher Nebenbefund — neutraler Start scheitert (vorübergehend):** von $\lambda_0=0$ (statt
 $-2/V_0^{1/3}$) braucht SQP 13 statt 5 Iterationen; die aktive Menge wechselt während der Folge
@@ -159,7 +165,7 @@ braucht das für größere, schlechter konditionierte Probleme. Nur eine Ungleic
 Kein Line-Search/Trust-Region/Merit-Function-Mechanismus zur Globalisierung (bewusst — Vehikel B
 ist klein genug, dass der volle Newton-Schritt mit informiertem Start immer konvergiert; ein
 industrietauglicher Löser braucht das für größere Probleme). Kein allgemeiner QP-Löser für
-beliebig viele Nebenbedingungen — Innere-Punkte-Verfahren (kommendes Stück) sind die
+beliebig viele Nebenbedingungen — Innere-Punkte-Verfahren (Stück 7) sind die
 systematische Antwort darauf.
 
 ## Lokal ausführen
@@ -176,3 +182,7 @@ streamlit run app.py
 - Wilson, R. B. (1963). *A Simplicial Algorithm for Concave Programming.* PhD-Thesis, Harvard
   University.
 - Nocedal, J. & Wright, S. J. (2006). *Numerical Optimization* (2. Aufl.). Springer, Kap. 18.
+
+---
+
+Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zur Reihe: [Nichtlineare Optimierung: acht Stücke, zwei Äste](https://sebastianhanisch.net/konzepte-nichtlineare-optimierung.html).
