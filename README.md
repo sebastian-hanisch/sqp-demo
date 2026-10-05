@@ -85,11 +85,11 @@ Iterationen (auf Maschinengenauigkeit, weit unter dem Zielfehler) gegen **12** �
 sowohl das Straf- als auch das Barriere-Verfahren (Stück 5), um überhaupt erst den viel gröberen
 Zielfehler zu erreichen.
 
-**Grenze des Vergleichs:** Für kleine Volumina ($V_0 \lesssim 5$, bei $h_{\max}=5$ gemessen) erreicht das
+**Grenze des Vergleichs:** Für kleine Volumina ($V_0 \lesssim 6$, bei $h_{\max}=5$ gemessen) erreicht das
 Strafverfahren (Start $r=h=V_0^{1/3}$) den Zielfehler in den erlaubten 40 äußeren Stufen **gar nicht**: es
 bleibt am trivialen Stationärpunkt $r=h=0$ hängen (dort verschwinden Gradient der Oberfläche und der
 Volumen-Nebenbedingung, für jedes $\rho$). Die App sagt das dann ausdrücklich und nennt keine Stufenzahl;
-das Barriere-Verfahren braucht im gemessenen Bereich 11–16 Stufen.
+das Barriere-Verfahren braucht dort 12 Stufen. Über das gesamte Reglerraster ($V_0=1,4,\dots,100$, $h_{\max}=0{,}5,1,\dots,6$) braucht das Strafverfahren 10–25 Stufen (in 24 von 408 Fällen gar nicht), das Barriere-Verfahren 10–17 Stufen, SQP 3–6 Iterationen.
 
 **Ehrlicher Nebenbefund — neutraler Start scheitert (vorübergehend):** von $\lambda_0=0$ (statt
 $-2/V_0^{1/3}$) braucht SQP 13 statt 5 Iterationen; die aktive Menge wechselt während der Folge
@@ -136,12 +136,15 @@ braucht das für größere, schlechter konditionierte Probleme. Nur eine Ungleic
 
 ## Tests
 
-36 Tests, `python -m pytest tests/ -v` (Laufzeit lokal ~2,8 Sekunden):
+56 Tests, `python -m pytest tests/ -v` (Laufzeit lokal ~5 Sekunden):
 - `test_functions.py` – Zielfunktion/Nebenbedingungen, Gradient/Hesse-Matrix gegen finite
   Differenzen.
 - `test_reference.py` – Referenzlösung.
 - `test_qp.py` – QP-Teilaufgabe (Fallauswahl, KKT-System exakt gelöst).
 - `test_solver.py` – Konvergenz, Trajektorie, naiver Start braucht mehr Iterationen.
+- `test_oracle_sqp.py` – unabhängige Orakel: Reduktion auf eine Variable $r$ (Lösung und Multiplikatoren),
+  QP-Teilaufgabe über die Parametrisierung der Gleichungsgeraden, Straf-Ableitungen per finiter Differenz,
+  Barriere-Stufenzahl per Goldener-Schnitt-Suche.
 - `test_evaluation.py`, `test_claims.py` – jede Zahl oben nachgerechnet.
 - `test_presets.py`, `test_app.py` – Presets, Regler-Extremwerte, Footer.
 

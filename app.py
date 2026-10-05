@@ -148,7 +148,7 @@ with col_right:
     st.metric("SQP-Iterationen", out["n_iter"])
     st.caption(
         "Zum Vergleich: Straf-/Barriere-Verfahren (Stück 5) brauchen für dieselbe Genauigkeit "
-        "typischerweise 12-16 äußere Stufen — oder erreichen sie gar nicht (siehe 🎯 unten)."
+        "im gemessenen Reglerraster 10 bis 25 (Straf) bzw. 10 bis 17 (Barriere) äußere Stufen — oder erreichen sie gar nicht (siehe 🎯 unten)."
     )
 
 st.markdown("---")
